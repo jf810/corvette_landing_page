@@ -65,52 +65,44 @@ All add/edit interactions use a **slide-in drawer from the right** — not a sep
 
 ---
 
-### Specs ✓ Built
+### Specs & Details ✓ Built
 **Read-only page — no user input.**
 
-Two-column layout matching Car and Driver's format, with a short history blurb at the top (red left-border card).
+**Source of truth:** `corvette_specs_and_details.md` — decoded SPID label, VIN breakdown, RPO codes, and GM fluid chart. All data hard-coded into the HTML template from that document.
 
-**Blurb (top of page):**
-Unveiled in March 1983, the 1984 Corvette marked the debut of the C4 generation — a ground-up redesign of America's sports car after twelve years of the C3. The new body was lower, sleeker, and more aerodynamic, with a clamshell hood and the first digital instrument cluster ever offered in a Corvette. Rather than chasing horsepower, GM prioritized handling for the C4's debut year — the result could pull 0.90 g on the skidpad, outgripping nearly everything on the road at the time. The optional Doug Nash 4+3 overdrive gave drivers the feel of a 4-speed manual with the fuel economy of an automatic — a distinctly 1980s solution, technically ambitious and unapologetically American.
+**Layout:** Window-sticker style — dark section headers, grouped label/value rows with horizontal dividers. Same CSS pattern (`sd-*` classes) used for all sections.
 
-**Specs to display (two-column layout):**
+**Page sections:**
 
-Column 1:
-- Vehicle Type: Front-engine, rear-wheel-drive, 2-passenger, 2-door targa
-- Price as Tested (C/D Est.): $28,000
-- Engine Type: Pushrod 16-valve V-8, iron block and heads, 2x1-bbl Rochester throttle-body fuel injection
-- Displacement: 350 in³, 5733 cm³
-- Power: 205 hp @ 4300 rpm
-- Torque: 290 lb-ft @ 2800 rpm
-- Transmission: 4-speed manual with Doug Nash 4+3 electronic overdrive
-- Suspension (F/R): struts/multilink
-- Brakes (F/R): 11.5-in vented disc / 11.5-in vented disc
-- Tires: Goodyear Eagle VR50, P255/50VR-16
+**1 — Performance Specs** (from C&D road test)
+- Vehicle (type, body style, price as tested)
+- Engine (L83 5.7L Cross-Fire Injection V8, displacement, power, torque)
+- Drivetrain (Doug Nash 4+3, rear axle ratio, suspension, brakes, tires)
+- Dimensions — two-column pairs (wheelbase/length, width/height, volumes, weight/fuel tank)
+- C/D Test Results — two-column pairs (0–60, 0–100, ¼ mile, top speed, braking, skidpad)
+- EPA Fuel Economy (city/highway, combined)
+- Source link to Car and Driver road test
 
-Column 2 — Dimensions:
-- Wheelbase: 96.0 in
-- Length: 176.5 in
-- Width: 71.0 in
-- Height: 46.9 in
-- Passenger Volume: 49 ft³
-- Cargo Volume: 18 ft³
-- Curb Weight: 3300 lb
+**2 — My Car — Trim & Color Codes** (from SPID label)
+- Exterior: color (Bright Red), paint code (WA8551), paint system, color codes (33U/33L), body style callout (targa/hatchback)
+- Interior: color (Carmine Red leather), code (742), trim code (74I), seat detail (perforated leather, sport seats AG9/A51)
+- RPO codes grouped by category: Engine & Drivetrain (L83, MM4, MK2, HE3), Comfort (AG9, A42, A51, AU3, K34), Audio (UQ4, UU8), Electrical/Cooling (K61, V01), Wheels (QZD), Emissions (NA5, NB1, V73)
 
-Column 2 — C/D Test Results:
-- 0–60 mph: 6.7 sec
-- 0–100 mph: 20.0 sec
-- 0–110 mph: 27.2 sec
-- Top gear, 30–50 mph: 3.5 sec
-- Top gear, 50–70 mph: 5.2 sec
-- 1/4 mile: 15.2 sec @ 90 mph
-- Top speed: 138 mph
-- Braking, 70–0 mph: 173 ft
-- Roadholding, 200-ft-dia skidpad: 0.90 g
+**3 — Fluids & Capacities** (from GM owner's manual)
+- Capacities table (two-column pairs): engine oil drain/filter, cooling, fuel, manual trans, OD unit, differential
+- Recommended fluids table (3 columns: system | GM/factory spec | currently in use)
 
-Column 2 — EPA Fuel Economy:
-- Combined/City/Highway: 20/16/28 mpg
+**4 — Vehicle Identification**
+- Year / Make / Model, Assembly Plant (Bowling Green, KY), Production Sequence (#135,728)
+- VIN — hidden by default, click-to-reveal button
+- License plate — hidden by default, click-to-reveal button
+- Mileage as of date (hard-coded, update manually in HTML)
 
-**Link at bottom:** [Car and Driver Road Test](https://www.caranddriver.com/reviews/a15141822/1984-chevrolet-corvette-c4-archived-road-test/)
+**5 — Notes & Quirks**
+- Shifter knob threading: 9/16-18
+- L83 flat-tappet cam ZDDP note
+- Doug Nash 4+3 split fluid note (different fluids for box vs. OD unit)
+- Limited-slip rear axle friction modifier note
 
 ---
 
@@ -245,7 +237,7 @@ CSS libraries like **98.css**, **7.css**, or **XP.css** provide authentic bevele
 1. ✓ Scaffold pages, navigation, and database schema
 2. ✓ Basic CRUD on all pages
 3. ✓ Repairs & Upgrades — full rebuild with drawer
-4. ✓ Specs — static page
+4. ✓ Specs & Details — window-sticker layout with performance specs, trim/color codes, fluids, vehicle ID (hidden VIN/plate), and notes
 5. ✓ Maintenance — full rebuild with drawer
 6. ✓ Wish List — full rebuild with drawer + promote button
 7. Expenses — add charts and category breakdown

@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Specs — 1984 Corvette{% endblock %}
-
-{% block page_title %}Specs{% endblock %}
+{% block title %}Specs & Details — 1984 Corvette{% endblock %}
+{% block page_title %}Specs & Details{% endblock %}
 
 {% block content %}
+<div class="sd-page">
 
 <p class="specs-blurb">
-    Unveiled in March 1983, the 1984 Corvette marked the debut of the C4 generation — a ground-up redesign
-    of America's sports car after twelve years of the C3. The new body was lower, sleeker, and more aerodynamic,
+    Unveiled in March 1983, the 1984 Corvette marked the debut of the C4 generation — a ground-up redesign of
+    America's sports car after twelve years of the C3. The new body was lower, sleeker, and more aerodynamic,
     with a clamshell hood and the first digital instrument cluster ever offered in a Corvette. Rather than chasing
     horsepower, GM prioritized handling for the C4's debut year — the result could pull 0.90 g on the skidpad,
     outgripping nearly everything on the road at the time. The optional Doug Nash 4+3 overdrive gave drivers
@@ -16,66 +16,416 @@
     technically ambitious and unapologetically American.
 </p>
 
-<div class="specs-sheet">
+<!-- ─── SECTION 1: PERFORMANCE SPECS ─── -->
+<div class="sd-section">
+    <div class="sd-section-header">Performance Specs — as tested by Car and Driver</div>
 
-    <div class="specs-block">
-        <div class="specs-block-title">Vehicle</div>
-        <div class="specs-row"><span class="specs-label">Type</span><span class="specs-value">Front-engine, rear-wheel-drive, 2-passenger, 2-door targatop</span></div>
-        <div class="specs-row"><span class="specs-label">Color</span><span class="specs-value">Red</span></div>
-        <div class="specs-row"><span class="specs-label">Price as Tested (C/D Est.)</span><span class="specs-value">$28,000</span></div>
+    <div class="sd-group">
+        <div class="sd-group-header">Vehicle</div>
+        <div class="sd-row">
+            <span class="sd-label">Type</span>
+            <span class="sd-value">Front-engine, rear-wheel-drive, 2-passenger, 2-door targa</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Body Style</span>
+            <span class="sd-value">Hatchback with removable targa roof panel</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Price as Tested (C/D Est.)</span>
+            <span class="sd-value">$28,000</span>
+        </div>
     </div>
 
-    <div class="specs-block">
-        <div class="specs-block-title">Engine</div>
-        <div class="specs-row"><span class="specs-label">Type</span><span class="specs-value">Pushrod 16-valve V-8, iron block and heads, 2x1-bbl Rochester throttle-body fuel injection</span></div>
-        <div class="specs-row"><span class="specs-label">Displacement</span><span class="specs-value">350 in³ (5733 cm³)</span></div>
-        <div class="specs-row"><span class="specs-label">Power</span><span class="specs-value">205 hp @ 4300 rpm</span></div>
-        <div class="specs-row"><span class="specs-label">Torque</span><span class="specs-value">290 lb-ft @ 2800 rpm</span></div>
+    <div class="sd-group">
+        <div class="sd-group-header">Engine</div>
+        <div class="sd-row">
+            <span class="sd-label">Type</span>
+            <span class="sd-value">L83 5.7L Cross-Fire Injection V-8 — pushrod, 16-valve, iron block and heads</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Displacement</span>
+            <span class="sd-value">350 in³ (5,733 cm³)</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Power</span>
+            <span class="sd-value">205 hp @ 4,300 rpm</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Torque</span>
+            <span class="sd-value">290 lb-ft @ 2,800 rpm</span>
+        </div>
     </div>
 
-    <div class="specs-block">
-        <div class="specs-block-title">Drivetrain</div>
-        <div class="specs-row"><span class="specs-label">Transmission</span><span class="specs-value">4-speed manual with Doug Nash 4+3 electronic overdrive</span></div>
-        <div class="specs-row"><span class="specs-label">Suspension (F/R)</span><span class="specs-value">Struts / multilink</span></div>
-        <div class="specs-row"><span class="specs-label">Brakes (F/R)</span><span class="specs-value">11.5-in vented disc / 11.5-in vented disc</span></div>
-        <div class="specs-row"><span class="specs-label">Tires</span><span class="specs-value">Goodyear Eagle VR50, P255/50VR-16</span></div>
+    <div class="sd-group">
+        <div class="sd-group-header">Drivetrain</div>
+        <div class="sd-row">
+            <span class="sd-label">Transmission</span>
+            <span class="sd-value">4-speed manual with Doug Nash 4+3 electronic overdrive</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Rear Axle Ratio</span>
+            <span class="sd-value">3.07:1 (RPO HE3)</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Suspension (F/R)</span>
+            <span class="sd-value">Struts / multilink</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Brakes (F/R)</span>
+            <span class="sd-value">11.5-in vented disc / 11.5-in vented disc</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Tires</span>
+            <span class="sd-value">Goodyear Eagle VR50, P255/50VR-16 (RPO QZD)</span>
+        </div>
     </div>
 
-    <div class="specs-block">
-        <div class="specs-block-title">Dimensions</div>
-        <div class="specs-row"><span class="specs-label">Wheelbase</span><span class="specs-value">96.0 in</span></div>
-        <div class="specs-row"><span class="specs-label">Length</span><span class="specs-value">176.5 in</span></div>
-        <div class="specs-row"><span class="specs-label">Width</span><span class="specs-value">71.0 in</span></div>
-        <div class="specs-row"><span class="specs-label">Height</span><span class="specs-value">46.9 in</span></div>
-        <div class="specs-row"><span class="specs-label">Passenger Volume</span><span class="specs-value">49 ft³</span></div>
-        <div class="specs-row"><span class="specs-label">Cargo Volume</span><span class="specs-value">18 ft³</span></div>
-        <div class="specs-row"><span class="specs-label">Curb Weight</span><span class="specs-value">3300 lb</span></div>
+    <div class="sd-group">
+        <div class="sd-group-header">Dimensions</div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Wheelbase</span><span class="sd-value">96.0 in</span>
+            <span class="sd-label">Length</span><span class="sd-value">176.5 in</span>
+        </div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Width</span><span class="sd-value">71.0 in</span>
+            <span class="sd-label">Height</span><span class="sd-value">46.9 in</span>
+        </div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Passenger Volume</span><span class="sd-value">49 ft³</span>
+            <span class="sd-label">Cargo Volume</span><span class="sd-value">18 ft³</span>
+        </div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Curb Weight</span><span class="sd-value">3,300 lb</span>
+            <span class="sd-label">Fuel Tank</span><span class="sd-value">20.0 gal</span>
+        </div>
     </div>
 
-    <div class="specs-block">
-        <div class="specs-block-title">C/D Test Results</div>
-        <div class="specs-row"><span class="specs-label">0–60 mph</span><span class="specs-value">6.7 sec</span></div>
-        <div class="specs-row"><span class="specs-label">0–100 mph</span><span class="specs-value">20.0 sec</span></div>
-        <div class="specs-row"><span class="specs-label">0–110 mph</span><span class="specs-value">27.2 sec</span></div>
-        <div class="specs-row"><span class="specs-label">Top gear, 30–50 mph</span><span class="specs-value">3.5 sec</span></div>
-        <div class="specs-row"><span class="specs-label">Top gear, 50–70 mph</span><span class="specs-value">5.2 sec</span></div>
-        <div class="specs-row"><span class="specs-label">¼ mile</span><span class="specs-value">15.2 sec @ 90 mph</span></div>
-        <div class="specs-row"><span class="specs-label">Top speed</span><span class="specs-value">138 mph</span></div>
-        <div class="specs-row"><span class="specs-label">Braking, 70–0 mph</span><span class="specs-value">173 ft</span></div>
-        <div class="specs-row"><span class="specs-label">Roadholding, 200-ft skidpad</span><span class="specs-value">0.90 g</span></div>
+    <div class="sd-group">
+        <div class="sd-group-header">C/D Test Results</div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">0–60 mph</span><span class="sd-value">6.7 sec</span>
+            <span class="sd-label">0–100 mph</span><span class="sd-value">20.0 sec</span>
+        </div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">0–110 mph</span><span class="sd-value">27.2 sec</span>
+            <span class="sd-label">¼ mile</span><span class="sd-value">15.2 sec @ 90 mph</span>
+        </div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Top gear, 30–50 mph</span><span class="sd-value">3.5 sec</span>
+            <span class="sd-label">Top gear, 50–70 mph</span><span class="sd-value">5.2 sec</span>
+        </div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Top speed</span><span class="sd-value">138 mph</span>
+            <span class="sd-label">Braking, 70–0 mph</span><span class="sd-value">173 ft</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Roadholding, 200-ft skidpad</span>
+            <span class="sd-value">0.90 g</span>
+        </div>
     </div>
 
-    <div class="specs-block">
-        <div class="specs-block-title">EPA Fuel Economy</div>
-        <div class="specs-row"><span class="specs-label">Combined / City / Highway</span><span class="specs-value">20 / 16 / 28 mpg</span></div>
+    <div class="sd-group">
+        <div class="sd-group-header">EPA Fuel Economy</div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">City</span><span class="sd-value">16 mpg</span>
+            <span class="sd-label">Highway</span><span class="sd-value">28 mpg</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Combined</span>
+            <span class="sd-value">20 mpg</span>
+        </div>
     </div>
-
 </div>
 
-<p class="specs-source">
-    Source: <a href="https://www.caranddriver.com/reviews/a15141822/1984-chevrolet-corvette-c4-archived-road-test/" target="_blank">Car and Driver — 1984 Chevrolet Corvette C4 Road Test</a>
-    &nbsp;·&nbsp;
-    <a href="https://www.corvsport.com/1984-c4-corvette/" target="_blank">CorvSport — 1984 C4 Corvette</a>
+<p class="sd-source">
+    Performance data: <a href="https://www.caranddriver.com/reviews/a15141822/1984-chevrolet-corvette-c4-archived-road-test/" target="_blank">Car and Driver — 1984 Chevrolet Corvette C4 Road Test ↗</a>
 </p>
+
+<!-- ─── SECTION 2: MY CAR — TRIM & CODES ─── -->
+<div class="sd-section">
+    <div class="sd-section-header">My Car — Trim &amp; Color Codes</div>
+
+    <div class="sd-group">
+        <div class="sd-group-header">Exterior</div>
+        <div class="sd-row">
+            <span class="sd-label">Color</span>
+            <span class="sd-value">Bright Red</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Paint Code</span>
+            <span class="sd-value">WA8551</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Paint System</span>
+            <span class="sd-value">Base coat / clear coat (BSE/CLR COAT)</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Color Code (upper / lower)</span>
+            <span class="sd-value">33U / 33L — Bright Red, single-color car</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Body Style</span>
+            <span class="sd-value">2-door hatchback with removable targa roof panel</span>
+        </div>
+    </div>
+
+    <div class="sd-group">
+        <div class="sd-group-header">Interior</div>
+        <div class="sd-row">
+            <span class="sd-label">Factory Interior Code</span>
+            <span class="sd-value">742 — Carmine Red leather (original from SPID label)</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Factory Interior Trim Code</span>
+            <span class="sd-value">74I — Carmine Red</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Current Interior</span>
+            <span class="sd-value">Black — carpet, dash, door panels, and trim replaced by previous owner</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Seats</span>
+            <span class="sd-value">Carmine Red perforated leather — original, retained — sport seats (RPO A51), 6-way power driver seat (RPO AG9)</span>
+        </div>
+    </div>
+
+    <div class="sd-group">
+        <div class="sd-group-header">RPO Codes — from SPID label</div>
+
+        <div class="sd-rpo-category">Engine &amp; Drivetrain</div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">L83</span>
+            <span class="sd-rpo-desc">Cross-Fire Injection 5.7L (350) V8 — only engine offered in 1984</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">MM4</span>
+            <span class="sd-rpo-desc">4-speed manual transmission</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">MK2</span>
+            <span class="sd-rpo-desc">Doug Nash "4+3" 4-speed manual with electronic overdrive</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">HE3</span>
+            <span class="sd-rpo-desc">Rear axle, 3.07:1 ratio</span>
+        </div>
+
+        <div class="sd-rpo-category">Comfort &amp; Convenience</div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">AG9</span>
+            <span class="sd-rpo-desc">Power driver seat (6-way)</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">A42</span>
+            <span class="sd-rpo-desc">Leather seats</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">A51</span>
+            <span class="sd-rpo-desc">Sport seats</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">AU3</span>
+            <span class="sd-rpo-desc">Power door locks</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">K34</span>
+            <span class="sd-rpo-desc">Cruise control</span>
+        </div>
+
+        <div class="sd-rpo-category">Audio</div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">UQ4</span>
+            <span class="sd-rpo-desc">Delco-Bose four-speaker system</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">UU8</span>
+            <span class="sd-rpo-desc">Delco-Bose AM/FM stereo with cassette</span>
+        </div>
+
+        <div class="sd-rpo-category">Electrical &amp; Cooling</div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">K61</span>
+            <span class="sd-rpo-desc">97-amp generator (alternator)</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">V01</span>
+            <span class="sd-rpo-desc">Heavy-duty radiator</span>
+        </div>
+
+        <div class="sd-rpo-category">Wheels &amp; Tires</div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">QZD</span>
+            <span class="sd-rpo-desc">16-inch wheels with P255/50VR16 tires</span>
+        </div>
+
+        <div class="sd-rpo-category">Emissions &amp; Certification</div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">NA5</span>
+            <span class="sd-rpo-desc">Federal emission system requirements</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">NB1</span>
+            <span class="sd-rpo-desc">Federal emission, closed-loop system</span>
+        </div>
+        <div class="sd-row sd-row--rpo">
+            <span class="sd-rpo-code">V73</span>
+            <span class="sd-rpo-desc">Vehicle statement / certification (US)</span>
+        </div>
+    </div>
+</div>
+
+<!-- ─── SECTION 3: FLUIDS & CAPACITIES ─── -->
+<div class="sd-section">
+    <div class="sd-section-header">Fluids &amp; Capacities</div>
+
+    <div class="sd-group">
+        <div class="sd-group-header">Capacities — factory approximate values</div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Engine oil (drain &amp; refill)</span><span class="sd-value">4 qt &nbsp;(3.8 L)</span>
+            <span class="sd-label">Engine oil (with filter)</span><span class="sd-value">5 qt &nbsp;(4.7 L)</span>
+        </div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Cooling system</span><span class="sd-value">14.5 qt &nbsp;(13.7 L)</span>
+            <span class="sd-label">Fuel tank</span><span class="sd-value">20.0 gal &nbsp;(75.7 L)</span>
+        </div>
+        <div class="sd-row sd-row--2col">
+            <span class="sd-label">Manual trans (4-speed box)</span><span class="sd-value">2 pt &nbsp;(1.0 L)</span>
+            <span class="sd-label">Overdrive unit (4+3)</span><span class="sd-value">4 pt &nbsp;(1.9 L)</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Rear differential</span>
+            <span class="sd-value">4 pt &nbsp;(1.7 L)</span>
+        </div>
+    </div>
+
+    <div class="sd-group">
+        <div class="sd-group-header">Recommended Fluids — GM spec vs. what's in the car</div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label sd-fluid-header">System</span>
+            <span class="sd-value sd-fluid-header">GM / Factory Spec (1984)</span>
+            <span class="sd-value sd-fluid-header">Currently In Use</span>
+        </div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label">Engine oil</span>
+            <span class="sd-fluid-col">API SF, SF/CC or SF/CD</span>
+            <span class="sd-fluid-col">Castrol GTX High Mileage 10W-30 (winter) / 10W-40 (summer)</span>
+        </div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label">Coolant</span>
+            <span class="sd-fluid-col">Ethylene-glycol, GM spec 1825M (Part No. 1052753)</span>
+            <span class="sd-fluid-col">—</span>
+        </div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label">Brake fluid</span>
+            <span class="sd-fluid-col">DOT-3 (Delco Supreme 11, Part No. 1052535)</span>
+            <span class="sd-fluid-col">DOT-3</span>
+        </div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label">Power steering</span>
+            <span class="sd-fluid-col">GM power steering fluid (Part No. 1050017)</span>
+            <span class="sd-fluid-col">—</span>
+        </div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label">Manual trans (4-speed)</span>
+            <span class="sd-fluid-col">SAE-80W or 80W-90 GL-5 gear lubricant</span>
+            <span class="sd-fluid-col">—</span>
+        </div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label">Overdrive unit (4+3)</span>
+            <span class="sd-fluid-col">DEXRON-II ATF (Part No. 1051855)</span>
+            <span class="sd-fluid-col">DEXRON-VI (backward compatible)</span>
+        </div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label">Rear differential (LS)</span>
+            <span class="sd-fluid-col">GM 1052271 + 4 oz GM 1052358 limited-slip additive</span>
+            <span class="sd-fluid-col">—</span>
+        </div>
+        <div class="sd-row sd-row--fluid">
+            <span class="sd-label">Chassis lubrication</span>
+            <span class="sd-fluid-col">Chassis grease, GM-6031M (Part No. 1051344)</span>
+            <span class="sd-fluid-col">—</span>
+        </div>
+    </div>
+</div>
+
+<!-- ─── SECTION 4: VEHICLE IDENTIFICATION ─── -->
+<div class="sd-section">
+    <div class="sd-section-header">Vehicle Identification</div>
+
+    <div class="sd-group">
+        <div class="sd-row">
+            <span class="sd-label">Year / Make / Model</span>
+            <span class="sd-value">1984 Chevrolet Corvette — C4 generation</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Assembly Plant</span>
+            <span class="sd-value">Bowling Green, Kentucky (VIN digit 11: "5")</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Production Sequence</span>
+            <span class="sd-value">Unit #135,728</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">VIN</span>
+            <span class="sd-value">
+                <span class="sd-mask" id="vin-mask">● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ●</span>
+                <span class="sd-hidden-value" id="vin-value">1G1AY0785E5135728</span>
+                <button class="btn-reveal" data-field="vin">Reveal</button>
+            </span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">License Plate</span>
+            <span class="sd-value">
+                <span class="sd-mask" id="plate-mask">● ● ● ● ● ●</span>
+                <span class="sd-hidden-value" id="plate-value">—</span>
+                <button class="btn-reveal" data-field="plate">Reveal</button>
+            </span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Mileage</span>
+            <span class="sd-value">79,176.7 mi — as of June 20, 2026</span>
+        </div>
+    </div>
+</div>
+
+<!-- ─── SECTION 5: NOTES & QUIRKS ─── -->
+<div class="sd-section">
+    <div class="sd-section-header">Notes &amp; Quirks</div>
+
+    <div class="sd-group">
+        <div class="sd-row">
+            <span class="sd-label">Shifter knob threading</span>
+            <span class="sd-value">9/16-18</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">L83 flat-tappet cam</span>
+            <span class="sd-value">Modern API SP oils have reduced ZDDP anti-wear additives — bad for flat-tappet cams. Run a high-mileage or "classic" oil with higher ZDDP, or add a ZDDP supplement.</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Doug Nash 4+3 fluids</span>
+            <span class="sd-value">The 4-speed main box and the overdrive unit take different fluids — 2 pt GL-5 gear lube in the box, 4 pt DEXRON-VI in the OD unit. Do not mix.</span>
+        </div>
+        <div class="sd-row">
+            <span class="sd-label">Rear axle (limited-slip)</span>
+            <span class="sd-value">Must add 4 oz of friction modifier (GM 1052358 or equivalent) before filling the diff, or it will chatter.</span>
+        </div>
+    </div>
+</div>
+
+</div><!-- .sd-page -->
+
+<script>
+document.querySelectorAll('.btn-reveal').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var field = this.dataset.field;
+        var mask = document.getElementById(field + '-mask');
+        var val = document.getElementById(field + '-value');
+        var isHidden = !val.classList.contains('revealed');
+        val.classList.toggle('revealed', isHidden);
+        mask.style.display = isHidden ? 'none' : '';
+        this.textContent = isHidden ? 'Hide' : 'Reveal';
+    });
+});
+</script>
 
 {% endblock %}
