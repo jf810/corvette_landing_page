@@ -6,51 +6,140 @@
 
 {% block content %}
 
-<form action="/wishlist/add" method="POST" class="entry-form">
-    <h2>Add Item</h2>
-    <input type="text" name="name" placeholder="Part / item name" required>
-    <select name="category">
-        <option value="Engine">Engine</option>
-        <option value="Transmission">Transmission</option>
-        <option value="Suspension">Suspension</option>
-        <option value="Steering">Steering</option>
-        <option value="Exterior/Cosmetic">Exterior/Cosmetic</option>
-        <option value="Interior">Interior</option>
-        <option value="Lights/Lamps">Lights/Lamps</option>
-        <option value="Other">Other</option>
-    </select>
-    <input type="number" name="price" placeholder="Price ($)" step="0.01">
-    <input type="url" name="link" placeholder="Link (URL)">
-    <textarea name="notes" placeholder="Notes"></textarea>
-    <button type="submit">Add to Wish List</button>
-</form>
+<div class="page-toolbar">
+    <div class="filter-bar">
+        <form method="GET" action="/wishlist" id="filter-form">
+            <select name="type" onchange="this.form.submit()">
+                <option value="">All Types</option>
+                <option value="Repair/Upgrade" {{ 'selected' if request_type == 'Repair/Upgrade' else '' }}>Repair/Upgrade</option>
+                <option value="Maintenance" {{ 'selected' if request_type == 'Maintenance' else '' }}>Maintenance</option>
+            </select>
+            <select name="category" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for cat in ['Engine','Transmission','Suspension','Steering','Exterior/Cosmetic','Interior','Lights/Lamps','Other'] %}
+                <option value="{{ cat }}" {{ 'selected' if request_category == cat else '' }}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <button class="btn-add" onclick="openDrawer()">+ Add to Wish List</button>
+</div>
 
-<h2>All Items</h2>
 {% if items %}
 <table>
     <thead>
         <tr>
             <th>Name</th>
+            <th>Type</th>
             <th>Category</th>
-            <th>Price</th>
-            <th>Link</th>
-            <th>Notes</th>
+            <th>Est. Price</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for item in items %}
         <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.category or "—" }}</td>
-            <td>{% if item.price %}${{ "%.2f"|format(item.price) }}{% else %}—{% endif %}</td>
-            <td>{% if item.link %}<a href="{{ item.link }}" target="_blank">Link</a>{% else %}—{% endif %}</td>
-            <td>{{ item.notes or "—" }}</td>
+            <td>
+                {{ item.name }}
+                {% if item.link %}
+                <a href="{{ item.link }}" target="_blank" class="link-icon">↗</a>
+                {% endif %}
+            </td>
+            <td>{{ item.type or '—' }}</td>
+            <td>{{ item.category or '—' }}</td>
+            <td>{% if item.estimated_price %}${{ "%.2f"|format(item.estimated_price) }}{% else %}—{% endif %}</td>
+            <td class="actions">
+                <form action="/wishlist/promote/{{ item.id }}" method="POST" style="display:inline"
+                      onsubmit="return confirm('Move &quot;{{ item.name }}&quot; to Repairs &amp; Upgrades?')">
+                    <button type="submit" class="btn-promote">→ Repairs</button>
+                </form>
+                <a href="#" data-item='{{ item | tojson }}' onclick="openEditDrawer(this)">Edit</a>
+                <form action="/wishlist/delete/{{ item.id }}" method="POST" style="display:inline"
+                      onsubmit="return confirm('Delete this item?')">
+                    <button type="submit" class="btn-delete">Delete</button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>No items on your wish list yet.</p>
+<p class="empty-state">Nothing on your wish list yet. Click <strong>+ Add to Wish List</strong> to get started.</p>
 {% endif %}
+
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <span id="drawer-title">Add to Wish List</span>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+
+    <form id="drawer-form" action="/wishlist/add" method="POST" class="drawer-form">
+
+        <label>Name</label>
+        <input type="text" name="name" id="f-name" placeholder="Part / item name" required>
+
+        <label>Type</label>
+        <select name="type" id="f-type">
+            <option value="Repair/Upgrade">Repair/Upgrade</option>
+            <option value="Maintenance">Maintenance</option>
+        </select>
+
+        <label>Category</label>
+        <select name="category" id="f-category">
+            <option value="">— Select category —</option>
+            {% for cat in ['Engine','Transmission','Suspension','Steering','Exterior/Cosmetic','Interior','Lights/Lamps','Other'] %}
+            <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Estimated Price ($)</label>
+        <input type="number" name="estimated_price" id="f-price" placeholder="0.00" step="0.01">
+
+        <label>Link</label>
+        <input type="url" name="link" id="f-link" placeholder="https://...">
+
+        <label>Notes</label>
+        <textarea name="notes" id="f-notes" rows="4" placeholder="Notes"></textarea>
+
+        <button type="submit" class="btn-submit" id="f-submit">Add to Wish List</button>
+    </form>
+</div>
+
+<script>
+function openDrawer() {
+    document.getElementById('drawer-title').textContent = 'Add to Wish List';
+    document.getElementById('drawer-form').action = '/wishlist/add';
+    document.getElementById('f-submit').textContent = 'Add to Wish List';
+    clearForm();
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+}
+
+function openEditDrawer(el) {
+    const item = JSON.parse(el.dataset.item);
+    document.getElementById('drawer-title').textContent = 'Edit Wish List Item';
+    document.getElementById('drawer-form').action = '/wishlist/update/' + item.id;
+    document.getElementById('f-submit').textContent = 'Save Changes';
+    document.getElementById('f-name').value = item.name || '';
+    document.getElementById('f-type').value = item.type || 'Repair/Upgrade';
+    document.getElementById('f-category').value = item.category || '';
+    document.getElementById('f-price').value = item.estimated_price || '';
+    document.getElementById('f-link').value = item.link || '';
+    document.getElementById('f-notes').value = item.notes || '';
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+}
+
+function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+function clearForm() {
+    document.getElementById('drawer-form').reset();
+}
+</script>
 
 {% endblock %}

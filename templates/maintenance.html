@@ -6,48 +6,234 @@
 
 {% block content %}
 
-<form action="/maintenance/add" method="POST" class="entry-form">
-    <h2>Add Maintenance Task</h2>
-    <input type="text" name="task" placeholder="Task (e.g. Oil change)" required>
-    <select name="status">
-        <option value="Pending">Pending</option>
-        <option value="Done">Done</option>
-    </select>
-    <input type="date" name="due_date">
-    <input type="date" name="completed_date">
-    <input type="text" name="time_taken" placeholder="Time taken (e.g. 1 hour)">
-    <textarea name="notes" placeholder="Notes"></textarea>
-    <button type="submit">Add Task</button>
-</form>
+<!-- Top toolbar -->
+<div class="page-toolbar">
+    <div class="filter-bar">
+        <form method="GET" action="/maintenance" id="filter-form">
+            <select name="status" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                {% for s in ['Pending', 'Done'] %}
+                <option value="{{ s }}" {{ 'selected' if request_status == s else '' }}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            <select name="recurring" onchange="this.form.submit()">
+                <option value="">All Tasks</option>
+                <option value="1" {{ 'selected' if request_recurring == '1' else '' }}>Recurring Only</option>
+                <option value="0" {{ 'selected' if request_recurring == '0' else '' }}>One-Time Only</option>
+            </select>
+            <select name="sort" onchange="this.form.submit()">
+                <option value="next_due_date" {{ 'selected' if request_sort == 'next_due_date' else '' }}>Sort: Next Due</option>
+                <option value="finish_date" {{ 'selected' if request_sort == 'finish_date' else '' }}>Sort: Last Done</option>
+                <option value="task" {{ 'selected' if request_sort == 'task' else '' }}>Sort: Task Name</option>
+                <option value="id" {{ 'selected' if request_sort == 'id' else '' }}>Sort: Date Added</option>
+            </select>
+        </form>
+    </div>
+    <button class="btn-add" onclick="openDrawer()">+ Add Maintenance Task</button>
+</div>
 
-<h2>All Maintenance</h2>
+<!-- Maintenance table -->
 {% if tasks %}
 <table>
     <thead>
         <tr>
             <th>Task</th>
             <th>Status</th>
-            <th>Due Date</th>
-            <th>Completed</th>
+            <th>Recurring</th>
+            <th>Next Due</th>
+            <th>Last Done</th>
             <th>Time Taken</th>
-            <th>Notes</th>
+            <th>Parts Vendor</th>
+            <th>Mechanic</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for task in tasks %}
         <tr>
-            <td>{{ task.task }}</td>
-            <td>{{ task.status }}</td>
-            <td>{{ task.due_date or "—" }}</td>
-            <td>{{ task.completed_date or "—" }}</td>
-            <td>{{ task.time_taken or "—" }}</td>
-            <td>{{ task.notes or "—" }}</td>
+            <td>
+                {{ task.task }}
+                {% if task.purchase_link %}
+                <a href="{{ task.purchase_link }}" target="_blank" class="link-icon">↗</a>
+                {% endif %}
+            </td>
+            <td><span class="status-badge status-{{ task.status | lower }}">{{ task.status }}</span></td>
+            <td>
+                {% if task.recurring %}
+                    <span style="color:#cc0000; font-weight:600;">Yes</span>
+                    {% if task.frequency_miles %}
+                    <br><small>Every {{ task.frequency_miles }} mi</small>
+                    {% endif %}
+                    {% if task.frequency_months_min %}
+                    <br><small>Every {{ task.frequency_months_min }}{% if task.frequency_months_max %}–{{ task.frequency_months_max }}{% endif %} mo</small>
+                    {% endif %}
+                {% else %}
+                    One-Time
+                {% endif %}
+            </td>
+            <td>{{ task.next_due_date or '—' }}</td>
+            <td>{{ 'Unknown' if task.finish_date_unknown else (task.finish_date or '—') }}</td>
+            <td>{{ task.time_taken or '—' }}</td>
+            <td>{{ task.vendor or '—' }}</td>
+            <td>
+                {% if task.mechanic %}
+                {{ task.mechanic }}{% if task.paid_for_service %} <small style="color:#cc0000;">(paid)</small>{% endif %}
+                {% else %}—{% endif %}
+            </td>
+            <td class="actions">
+                <a href="#" data-task='{{ task | tojson }}' onclick="openEditDrawer(this)">Edit</a>
+                <form action="/maintenance/delete/{{ task.id }}" method="POST" style="display:inline"
+                      onsubmit="return confirm('Delete this task?')">
+                    <button type="submit" class="btn-delete">Delete</button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>No maintenance tasks yet.</p>
+<p class="empty-state">No maintenance tasks yet. Click <strong>+ Add Maintenance Task</strong> to get started.</p>
 {% endif %}
+
+<!-- Overlay -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<!-- Slide-in drawer -->
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <span id="drawer-title">Add Maintenance Task</span>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+
+    <form id="drawer-form" action="/maintenance/add" method="POST" class="drawer-form">
+
+        <label>Task Name</label>
+        <input type="text" name="task" id="f-task" placeholder="e.g. Oil change, Tire rotation" required>
+
+        <label>Status</label>
+        <select name="status" id="f-status">
+            <option value="Pending">Pending</option>
+            <option value="Done">Done</option>
+        </select>
+
+        <label class="toggle-label">
+            <input type="checkbox" name="start_date_unknown" id="f-start-unknown" value="1"
+                   onchange="toggleDate('f-start-date', this)">
+            Start date unknown
+        </label>
+        <input type="date" name="start_date" id="f-start-date">
+
+        <label class="toggle-label">
+            <input type="checkbox" name="finish_date_unknown" id="f-finish-unknown" value="1"
+                   onchange="toggleDate('f-finish-date', this)">
+            Finish date unknown
+        </label>
+        <input type="date" name="finish_date" id="f-finish-date">
+
+        <label>Time Taken</label>
+        <input type="text" name="time_taken" id="f-time" placeholder="e.g. 30 min">
+
+        <label class="toggle-label" style="margin-top:4px;">
+            <input type="checkbox" name="paid_for_service" id="f-paid" value="1">
+            Paid for service (labor)
+        </label>
+
+        <label>Mechanic / Shop Name</label>
+        <input type="text" name="mechanic" id="f-mechanic" placeholder="e.g. Joe's Auto, Mike the mechanic">
+
+        <label>Parts / Materials Vendor</label>
+        <input type="text" name="vendor" id="f-vendor" placeholder="e.g. NAPA, O'Reilly, Amazon">
+
+        <label>Purchase Link</label>
+        <input type="url" name="purchase_link" id="f-link" placeholder="https://...">
+
+        <label class="toggle-label" style="margin-top:8px;">
+            <input type="checkbox" name="recurring" id="f-recurring" value="1"
+                   onchange="toggleRecurring(this)">
+            Recurring task
+        </label>
+
+        <div id="recurring-fields" style="display:none; border-left:3px solid #cc0000; padding-left:12px; display:none;">
+            <label>Every X miles (optional)</label>
+            <input type="number" name="frequency_miles" id="f-miles" placeholder="e.g. 3000">
+
+            <label>Every X months (min)</label>
+            <input type="number" name="frequency_months_min" id="f-months-min" placeholder="e.g. 3">
+
+            <label>Every X months (max, optional)</label>
+            <input type="number" name="frequency_months_max" id="f-months-max" placeholder="e.g. 6">
+        </div>
+
+        <label>Notes</label>
+        <textarea name="notes" id="f-notes" rows="4" placeholder="Notes"></textarea>
+
+        <button type="submit" class="btn-submit" id="f-submit">Add Task</button>
+    </form>
+</div>
+
+<script>
+function openDrawer() {
+    document.getElementById('drawer-title').textContent = 'Add Maintenance Task';
+    document.getElementById('drawer-form').action = '/maintenance/add';
+    document.getElementById('f-submit').textContent = 'Add Task';
+    clearForm();
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+}
+
+function openEditDrawer(el) {
+    const task = JSON.parse(el.dataset.task);
+    document.getElementById('drawer-title').textContent = 'Edit Maintenance Task';
+    document.getElementById('drawer-form').action = '/maintenance/update/' + task.id;
+    document.getElementById('f-submit').textContent = 'Save Changes';
+
+    document.getElementById('f-task').value = task.task || '';
+    document.getElementById('f-status').value = task.status || 'Pending';
+    document.getElementById('f-start-date').value = task.start_date || '';
+    document.getElementById('f-start-unknown').checked = !!task.start_date_unknown;
+    document.getElementById('f-start-date').disabled = !!task.start_date_unknown;
+    document.getElementById('f-finish-date').value = task.finish_date || '';
+    document.getElementById('f-finish-unknown').checked = !!task.finish_date_unknown;
+    document.getElementById('f-finish-date').disabled = !!task.finish_date_unknown;
+    document.getElementById('f-time').value = task.time_taken || '';
+    document.getElementById('f-paid').checked = !!task.paid_for_service;
+    document.getElementById('f-mechanic').value = task.mechanic || '';
+    document.getElementById('f-vendor').value = task.vendor || '';
+    document.getElementById('f-link').value = task.purchase_link || '';
+    document.getElementById('f-notes').value = task.notes || '';
+
+    const recurring = !!task.recurring;
+    document.getElementById('f-recurring').checked = recurring;
+    document.getElementById('recurring-fields').style.display = recurring ? 'block' : 'none';
+    document.getElementById('f-miles').value = task.frequency_miles || '';
+    document.getElementById('f-months-min').value = task.frequency_months_min || '';
+    document.getElementById('f-months-max').value = task.frequency_months_max || '';
+
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+}
+
+function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+function clearForm() {
+    document.getElementById('drawer-form').reset();
+    document.getElementById('f-start-date').disabled = false;
+    document.getElementById('f-finish-date').disabled = false;
+    document.getElementById('recurring-fields').style.display = 'none';
+}
+
+function toggleDate(fieldId, checkbox) {
+    const input = document.getElementById(fieldId);
+    input.disabled = checkbox.checked;
+    if (checkbox.checked) input.value = '';
+}
+
+function toggleRecurring(checkbox) {
+    document.getElementById('recurring-fields').style.display = checkbox.checked ? 'block' : 'none';
+}
+</script>
 
 {% endblock %}

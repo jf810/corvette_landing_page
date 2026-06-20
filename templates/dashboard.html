@@ -23,7 +23,7 @@
         <h2>Next Maintenance</h2>
         {% if next_maintenance %}
             <p>{{ next_maintenance.task }}</p>
-            <p>Due: {{ next_maintenance.due_date or "No date set" }}</p>
+            <p>Due: {{ next_maintenance.next_due_date or "No date set" }}</p>
         {% else %}
             <p>No maintenance scheduled.</p>
         {% endif %}

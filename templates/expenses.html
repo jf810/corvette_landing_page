@@ -6,40 +6,32 @@
 
 {% block content %}
 
-<form action="/expenses/add" method="POST" class="entry-form">
-    <h2>Add Expense</h2>
-    <input type="text" name="description" placeholder="Description (e.g. New tires)" required>
-    <input type="number" name="amount" placeholder="Amount ($)" step="0.01" required>
-    <input type="date" name="date">
-    <input type="text" name="category" placeholder="Category (e.g. Parts, Labor)">
-    <button type="submit">Add Expense</button>
-</form>
+<div class="page-toolbar">
+    <p style="font-size:13px; color:#666;">Costs pulled automatically from Repairs &amp; Upgrades entries.</p>
+    <div style="font-size:22px; font-weight:700; color:#cc0000;">${{ "%.2f"|format(total) }} total</div>
+</div>
 
-<h2>All Expenses</h2>
-{% if expenses %}
-<p><strong>Total: ${{ "%.2f"|format(total) }}</strong></p>
+{% if repairs %}
 <table>
     <thead>
         <tr>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Category</th>
+            <th>Repair / Upgrade</th>
+            <th>Cost</th>
+            <th>Completed</th>
         </tr>
     </thead>
     <tbody>
-        {% for expense in expenses %}
+        {% for r in repairs %}
         <tr>
-            <td>{{ expense.description }}</td>
-            <td>${{ "%.2f"|format(expense.amount) }}</td>
-            <td>{{ expense.date or "—" }}</td>
-            <td>{{ expense.category or "—" }}</td>
+            <td>{{ r.title }}</td>
+            <td>${{ "%.2f"|format(r.cost) }}</td>
+            <td>{{ r.finish_date or "—" }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>No expenses logged yet.</p>
+<p class="empty-state">No repair costs logged yet. Add costs to your <a href="/repairs" style="color:#cc0000;">Repairs &amp; Upgrades</a> entries to see them here.</p>
 {% endif %}
 
 {% endblock %}

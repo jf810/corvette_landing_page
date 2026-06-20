@@ -6,50 +6,207 @@
 
 {% block content %}
 
-<form action="/repairs/add" method="POST" class="entry-form">
-    <h2>Add Repair / Upgrade</h2>
-    <input type="text" name="title" placeholder="Title (e.g. Replace brake pads)" required>
-    <select name="status">
-        <option value="Not Started">Not Started</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Done">Done</option>
-    </select>
-    <input type="number" name="cost" placeholder="Cost ($)" step="0.01">
-    <input type="number" name="year" placeholder="Year (if exact date unknown)">
-    <input type="date" name="date">
-    <input type="text" name="time_taken" placeholder="Time taken (e.g. 2 hours)">
-    <textarea name="notes" placeholder="Notes"></textarea>
-    <button type="submit">Add Repair</button>
-</form>
+<!-- Top bar -->
+<div class="page-toolbar">
+    <div class="filter-bar">
+        <form method="GET" action="/repairs" id="filter-form">
+            <select name="status" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                {% for s in ['Not Started', 'In Progress', 'Done'] %}
+                <option value="{{ s }}" {{ 'selected' if request_status == s else '' }}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            <select name="sort" onchange="this.form.submit()">
+                <option value="id" {{ 'selected' if request_sort == 'id' else '' }}>Sort: Date Added</option>
+                <option value="cost" {{ 'selected' if request_sort == 'cost' else '' }}>Sort: Cost</option>
+                <option value="start_date" {{ 'selected' if request_sort == 'start_date' else '' }}>Sort: Start Date</option>
+                <option value="finish_date" {{ 'selected' if request_sort == 'finish_date' else '' }}>Sort: Finish Date</option>
+                <option value="title" {{ 'selected' if request_sort == 'title' else '' }}>Sort: Title</option>
+            </select>
+        </form>
+    </div>
+    <button class="btn-add" onclick="openDrawer()">+ Add Repair / Upgrade</button>
+</div>
 
-<h2>All Repairs</h2>
+<!-- Repairs table -->
 {% if repairs %}
 <table>
     <thead>
         <tr>
             <th>Title</th>
             <th>Status</th>
+            <th>Category</th>
             <th>Cost</th>
-            <th>Date</th>
+            <th>Start Date</th>
+            <th>Finish Date</th>
             <th>Time Taken</th>
-            <th>Notes</th>
+            <th>Parts Vendor</th>
+            <th>Mechanic</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for repair in repairs %}
         <tr>
-            <td>{{ repair.title }}</td>
-            <td>{{ repair.status }}</td>
-            <td>${{ "%.2f"|format(repair.cost) }}</td>
-            <td>{{ repair.date or repair.year or "—" }}</td>
-            <td>{{ repair.time_taken or "—" }}</td>
-            <td>{{ repair.notes or "—" }}</td>
+            <td>
+                {{ repair.title }}
+                {% if repair.purchase_link %}
+                <a href="{{ repair.purchase_link }}" target="_blank" class="link-icon">↗</a>
+                {% endif %}
+            </td>
+            <td><span class="status-badge status-{{ repair.status | lower | replace(' ', '-') }}">{{ repair.status }}</span></td>
+            <td>{{ repair.category or '—' }}</td>
+            <td>${{ "%.2f"|format(repair.cost or 0) }}</td>
+            <td>{{ 'Unknown' if repair.start_date_unknown else (repair.start_date or '—') }}</td>
+            <td>{{ 'Unknown' if repair.finish_date_unknown else (repair.finish_date or '—') }}</td>
+            <td>{{ repair.time_taken or '—' }}</td>
+            <td>{{ repair.vendor or '—' }}</td>
+            <td>
+                {% if repair.mechanic %}
+                {{ repair.mechanic }}{% if repair.paid_for_service %} <small style="color:#cc0000;">(paid)</small>{% endif %}
+                {% else %}—{% endif %}
+            </td>
+            <td class="actions">
+                <a href="#" data-repair='{{ repair | tojson }}' onclick="openEditDrawer(this)">Edit</a>
+                <form action="/repairs/delete/{{ repair.id }}" method="POST" style="display:inline"
+                      onsubmit="return confirm('Delete this repair?')">
+                    <button type="submit" class="btn-delete">Delete</button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>No repairs logged yet.</p>
+<p class="empty-state">No repairs logged yet. Click <strong>+ Add Repair / Upgrade</strong> to get started.</p>
 {% endif %}
+
+<!-- Overlay -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<!-- Slide-in drawer -->
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <span id="drawer-title">Add Repair / Upgrade</span>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+
+    <form id="drawer-form" action="/repairs/add" method="POST" class="drawer-form">
+        <input type="text" name="title" id="f-title" placeholder="Title (e.g. Replace brake pads)" required>
+
+        <label>Status</label>
+        <select name="status" id="f-status">
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Done">Done</option>
+        </select>
+
+        <label>Category</label>
+        <select name="category" id="f-category">
+            <option value="">— Select category —</option>
+            <option value="Engine">Engine</option>
+            <option value="Transmission">Transmission</option>
+            <option value="Suspension">Suspension</option>
+            <option value="Steering">Steering</option>
+            <option value="Exterior/Cosmetic">Exterior/Cosmetic</option>
+            <option value="Interior">Interior</option>
+            <option value="Lights/Lamps">Lights/Lamps</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label>Cost ($)</label>
+        <input type="number" name="cost" id="f-cost" placeholder="0.00" step="0.01">
+
+        <label class="toggle-label">
+            <input type="checkbox" name="start_date_unknown" id="f-start-unknown" value="1"
+                   onchange="toggleDate('f-start-date', this)">
+            Start date unknown
+        </label>
+        <input type="date" name="start_date" id="f-start-date">
+
+        <label class="toggle-label">
+            <input type="checkbox" name="finish_date_unknown" id="f-finish-unknown" value="1"
+                   onchange="toggleDate('f-finish-date', this)">
+            Finish date unknown
+        </label>
+        <input type="date" name="finish_date" id="f-finish-date">
+
+        <label>Time Taken</label>
+        <input type="text" name="time_taken" id="f-time" placeholder="e.g. 3 hours">
+
+        <label class="toggle-label" style="margin-top:4px;">
+            <input type="checkbox" name="paid_for_service" id="f-paid" value="1">
+            Paid for service (labor)
+        </label>
+
+        <label>Mechanic / Shop Name</label>
+        <input type="text" name="mechanic" id="f-mechanic" placeholder="e.g. Joe's Auto, Mike the mechanic">
+
+        <label>Parts / Materials Vendor</label>
+        <input type="text" name="vendor" id="f-vendor" placeholder="e.g. RockAuto, NAPA, Summit Racing">
+
+        <label>Purchase Link</label>
+        <input type="url" name="purchase_link" id="f-link" placeholder="https://...">
+
+        <label>Notes</label>
+        <textarea name="notes" id="f-notes" rows="4" placeholder="Notes"></textarea>
+
+        <button type="submit" class="btn-submit" id="f-submit">Add Repair</button>
+    </form>
+</div>
+
+<script>
+function openDrawer() {
+    document.getElementById('drawer-title').textContent = 'Add Repair / Upgrade';
+    document.getElementById('drawer-form').action = '/repairs/add';
+    document.getElementById('f-submit').textContent = 'Add Repair';
+    clearForm();
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+}
+
+function openEditDrawer(el) {
+    const repair = JSON.parse(el.dataset.repair);
+    const id = repair.id;
+    document.getElementById('drawer-title').textContent = 'Edit Repair';
+    document.getElementById('drawer-form').action = '/repairs/update/' + id;
+    document.getElementById('f-submit').textContent = 'Save Changes';
+    document.getElementById('f-title').value = repair.title || '';
+    document.getElementById('f-status').value = repair.status || 'Not Started';
+    document.getElementById('f-category').value = repair.category || '';
+    document.getElementById('f-cost').value = repair.cost || '';
+    document.getElementById('f-start-date').value = repair.start_date || '';
+    document.getElementById('f-start-unknown').checked = !!repair.start_date_unknown;
+    document.getElementById('f-start-date').disabled = !!repair.start_date_unknown;
+    document.getElementById('f-finish-date').value = repair.finish_date || '';
+    document.getElementById('f-finish-unknown').checked = !!repair.finish_date_unknown;
+    document.getElementById('f-finish-date').disabled = !!repair.finish_date_unknown;
+    document.getElementById('f-time').value = repair.time_taken || '';
+    document.getElementById('f-paid').checked = !!repair.paid_for_service;
+    document.getElementById('f-mechanic').value = repair.mechanic || '';
+    document.getElementById('f-vendor').value = repair.vendor || '';
+    document.getElementById('f-link').value = repair.purchase_link || '';
+    document.getElementById('f-notes').value = repair.notes || '';
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+}
+
+function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+function clearForm() {
+    document.getElementById('drawer-form').reset();
+    document.getElementById('f-start-date').disabled = false;
+    document.getElementById('f-finish-date').disabled = false;
+}
+
+function toggleDate(fieldId, checkbox) {
+    const input = document.getElementById(fieldId);
+    input.disabled = checkbox.checked;
+    if (checkbox.checked) input.value = '';
+}
+</script>
 
 {% endblock %}

@@ -6,33 +6,76 @@
 
 {% block content %}
 
-<form action="/specs/add" method="POST" class="entry-form">
-    <h2>Add / Update Spec</h2>
-    <input type="text" name="field" placeholder="Field (e.g. Horsepower)" required>
-    <input type="text" name="value" placeholder="Value (e.g. 205 hp)" required>
-    <button type="submit">Save Spec</button>
-</form>
+<p class="specs-blurb">
+    Unveiled in March 1983, the 1984 Corvette marked the debut of the C4 generation — a ground-up redesign
+    of America's sports car after twelve years of the C3. The new body was lower, sleeker, and more aerodynamic,
+    with a clamshell hood and the first digital instrument cluster ever offered in a Corvette. Rather than chasing
+    horsepower, GM prioritized handling for the C4's debut year — the result could pull 0.90 g on the skidpad,
+    outgripping nearly everything on the road at the time. The optional Doug Nash 4+3 overdrive gave drivers
+    the feel of a 4-speed manual with the fuel economy of an automatic — a distinctly 1980s solution,
+    technically ambitious and unapologetically American.
+</p>
 
-<h2>My 1984 Corvette Specs</h2>
-{% if specs %}
-<table>
-    <thead>
-        <tr>
-            <th>Field</th>
-            <th>Value</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for spec in specs %}
-        <tr>
-            <td>{{ spec.field }}</td>
-            <td>{{ spec.value }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No specs added yet.</p>
-{% endif %}
+<div class="specs-sheet">
+
+    <div class="specs-block">
+        <div class="specs-block-title">Vehicle</div>
+        <div class="specs-row"><span class="specs-label">Type</span><span class="specs-value">Front-engine, rear-wheel-drive, 2-passenger, 2-door targatop</span></div>
+        <div class="specs-row"><span class="specs-label">Color</span><span class="specs-value">Red</span></div>
+        <div class="specs-row"><span class="specs-label">Price as Tested (C/D Est.)</span><span class="specs-value">$28,000</span></div>
+    </div>
+
+    <div class="specs-block">
+        <div class="specs-block-title">Engine</div>
+        <div class="specs-row"><span class="specs-label">Type</span><span class="specs-value">Pushrod 16-valve V-8, iron block and heads, 2x1-bbl Rochester throttle-body fuel injection</span></div>
+        <div class="specs-row"><span class="specs-label">Displacement</span><span class="specs-value">350 in³ (5733 cm³)</span></div>
+        <div class="specs-row"><span class="specs-label">Power</span><span class="specs-value">205 hp @ 4300 rpm</span></div>
+        <div class="specs-row"><span class="specs-label">Torque</span><span class="specs-value">290 lb-ft @ 2800 rpm</span></div>
+    </div>
+
+    <div class="specs-block">
+        <div class="specs-block-title">Drivetrain</div>
+        <div class="specs-row"><span class="specs-label">Transmission</span><span class="specs-value">4-speed manual with Doug Nash 4+3 electronic overdrive</span></div>
+        <div class="specs-row"><span class="specs-label">Suspension (F/R)</span><span class="specs-value">Struts / multilink</span></div>
+        <div class="specs-row"><span class="specs-label">Brakes (F/R)</span><span class="specs-value">11.5-in vented disc / 11.5-in vented disc</span></div>
+        <div class="specs-row"><span class="specs-label">Tires</span><span class="specs-value">Goodyear Eagle VR50, P255/50VR-16</span></div>
+    </div>
+
+    <div class="specs-block">
+        <div class="specs-block-title">Dimensions</div>
+        <div class="specs-row"><span class="specs-label">Wheelbase</span><span class="specs-value">96.0 in</span></div>
+        <div class="specs-row"><span class="specs-label">Length</span><span class="specs-value">176.5 in</span></div>
+        <div class="specs-row"><span class="specs-label">Width</span><span class="specs-value">71.0 in</span></div>
+        <div class="specs-row"><span class="specs-label">Height</span><span class="specs-value">46.9 in</span></div>
+        <div class="specs-row"><span class="specs-label">Passenger Volume</span><span class="specs-value">49 ft³</span></div>
+        <div class="specs-row"><span class="specs-label">Cargo Volume</span><span class="specs-value">18 ft³</span></div>
+        <div class="specs-row"><span class="specs-label">Curb Weight</span><span class="specs-value">3300 lb</span></div>
+    </div>
+
+    <div class="specs-block">
+        <div class="specs-block-title">C/D Test Results</div>
+        <div class="specs-row"><span class="specs-label">0–60 mph</span><span class="specs-value">6.7 sec</span></div>
+        <div class="specs-row"><span class="specs-label">0–100 mph</span><span class="specs-value">20.0 sec</span></div>
+        <div class="specs-row"><span class="specs-label">0–110 mph</span><span class="specs-value">27.2 sec</span></div>
+        <div class="specs-row"><span class="specs-label">Top gear, 30–50 mph</span><span class="specs-value">3.5 sec</span></div>
+        <div class="specs-row"><span class="specs-label">Top gear, 50–70 mph</span><span class="specs-value">5.2 sec</span></div>
+        <div class="specs-row"><span class="specs-label">¼ mile</span><span class="specs-value">15.2 sec @ 90 mph</span></div>
+        <div class="specs-row"><span class="specs-label">Top speed</span><span class="specs-value">138 mph</span></div>
+        <div class="specs-row"><span class="specs-label">Braking, 70–0 mph</span><span class="specs-value">173 ft</span></div>
+        <div class="specs-row"><span class="specs-label">Roadholding, 200-ft skidpad</span><span class="specs-value">0.90 g</span></div>
+    </div>
+
+    <div class="specs-block">
+        <div class="specs-block-title">EPA Fuel Economy</div>
+        <div class="specs-row"><span class="specs-label">Combined / City / Highway</span><span class="specs-value">20 / 16 / 28 mpg</span></div>
+    </div>
+
+</div>
+
+<p class="specs-source">
+    Source: <a href="https://www.caranddriver.com/reviews/a15141822/1984-chevrolet-corvette-c4-archived-road-test/" target="_blank">Car and Driver — 1984 Chevrolet Corvette C4 Road Test</a>
+    &nbsp;·&nbsp;
+    <a href="https://www.corvsport.com/1984-c4-corvette/" target="_blank">CorvSport — 1984 C4 Corvette</a>
+</p>
 
 {% endblock %}
