@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Wish List — 1984 Corvette{% endblock %}
+
+{% block page_title %}Wish List{% endblock %}
+
+{% block content %}
+
+<form action="/wishlist/add" method="POST" class="entry-form">
+    <h2>Add Item</h2>
+    <input type="text" name="name" placeholder="Part / item name" required>
+    <select name="category">
+        <option value="Engine">Engine</option>
+        <option value="Transmission">Transmission</option>
+        <option value="Suspension">Suspension</option>
+        <option value="Steering">Steering</option>
+        <option value="Exterior/Cosmetic">Exterior/Cosmetic</option>
+        <option value="Interior">Interior</option>
+        <option value="Lights/Lamps">Lights/Lamps</option>
+        <option value="Other">Other</option>
+    </select>
+    <input type="number" name="price" placeholder="Price ($)" step="0.01">
+    <input type="url" name="link" placeholder="Link (URL)">
+    <textarea name="notes" placeholder="Notes"></textarea>
+    <button type="submit">Add to Wish List</button>
+</form>
+
+<h2>All Items</h2>
+{% if items %}
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Link</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category or "—" }}</td>
+            <td>{% if item.price %}${{ "%.2f"|format(item.price) }}{% else %}—{% endif %}</td>
+            <td>{% if item.link %}<a href="{{ item.link }}" target="_blank">Link</a>{% else %}—{% endif %}</td>
+            <td>{{ item.notes or "—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No items on your wish list yet.</p>
+{% endif %}
+
+{% endblock %}

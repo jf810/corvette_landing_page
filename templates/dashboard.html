@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — 1984 Corvette{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+
+    <div class="card">
+        <h2>Active Repairs</h2>
+        {% if active_repairs %}
+            {% for repair in active_repairs %}
+            <p>{{ repair.title }} — <em>{{ repair.status }}</em></p>
+            {% endfor %}
+        {% else %}
+            <p>No active repairs.</p>
+        {% endif %}
+        <a href="/repairs">View all repairs →</a>
+    </div>
+
+    <div class="card">
+        <h2>Next Maintenance</h2>
+        {% if next_maintenance %}
+            <p>{{ next_maintenance.task }}</p>
+            <p>Due: {{ next_maintenance.due_date or "No date set" }}</p>
+        {% else %}
+            <p>No maintenance scheduled.</p>
+        {% endif %}
+        <a href="/maintenance">View maintenance →</a>
+    </div>
+
+    <div class="card">
+        <h2>Total Spent</h2>
+        <p>${{ "%.2f"|format(total_spent) }}</p>
+        <a href="/expenses">View expenses →</a>
+    </div>
+
+    <div class="card">
+        <h2>Wish List</h2>
+        <p>{{ wishlist_count }} item{{ "s" if wishlist_count != 1 else "" }}</p>
+        <a href="/wishlist">View wish list →</a>
+    </div>
+
+</div>
+{% endblock %}

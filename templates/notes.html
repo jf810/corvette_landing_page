@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Notes — 1984 Corvette{% endblock %}
+
+{% block page_title %}Notes{% endblock %}
+
+{% block content %}
+
+<form action="/notes/add" method="POST" class="entry-form">
+    <h2>Add Note</h2>
+    <input type="text" name="title" placeholder="Title" required>
+    <input type="text" name="folder" placeholder="Folder (e.g. Engine, General)" value="General">
+    <textarea name="content" placeholder="Note content" rows="6"></textarea>
+    <button type="submit">Save Note</button>
+</form>
+
+<h2>All Notes</h2>
+{% if notes %}
+    {% set current_folder = namespace(name="") %}
+    {% for note in notes %}
+        {% if note.folder != current_folder.name %}
+            {% set current_folder.name = note.folder %}
+            <h3>{{ note.folder }}</h3>
+        {% endif %}
+        <div class="note-card">
+            <strong>{{ note.title }}</strong>
+            <p>{{ note.content or "" }}</p>
+            <small>{{ note.created_at }}</small>
+        </div>
+    {% endfor %}
+{% else %}
+<p>No notes yet.</p>
+{% endif %}
+
+{% endblock %}

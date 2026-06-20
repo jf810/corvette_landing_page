@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Repairs & Upgrades — 1984 Corvette{% endblock %}
+
+{% block page_title %}Repairs & Upgrades{% endblock %}
+
+{% block content %}
+
+<form action="/repairs/add" method="POST" class="entry-form">
+    <h2>Add Repair / Upgrade</h2>
+    <input type="text" name="title" placeholder="Title (e.g. Replace brake pads)" required>
+    <select name="status">
+        <option value="Not Started">Not Started</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Done">Done</option>
+    </select>
+    <input type="number" name="cost" placeholder="Cost ($)" step="0.01">
+    <input type="number" name="year" placeholder="Year (if exact date unknown)">
+    <input type="date" name="date">
+    <input type="text" name="time_taken" placeholder="Time taken (e.g. 2 hours)">
+    <textarea name="notes" placeholder="Notes"></textarea>
+    <button type="submit">Add Repair</button>
+</form>
+
+<h2>All Repairs</h2>
+{% if repairs %}
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Cost</th>
+            <th>Date</th>
+            <th>Time Taken</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for repair in repairs %}
+        <tr>
+            <td>{{ repair.title }}</td>
+            <td>{{ repair.status }}</td>
+            <td>${{ "%.2f"|format(repair.cost) }}</td>
+            <td>{{ repair.date or repair.year or "—" }}</td>
+            <td>{{ repair.time_taken or "—" }}</td>
+            <td>{{ repair.notes or "—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No repairs logged yet.</p>
+{% endif %}
+
+{% endblock %}

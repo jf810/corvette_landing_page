@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Expenses — 1984 Corvette{% endblock %}
+
+{% block page_title %}Expenses{% endblock %}
+
+{% block content %}
+
+<form action="/expenses/add" method="POST" class="entry-form">
+    <h2>Add Expense</h2>
+    <input type="text" name="description" placeholder="Description (e.g. New tires)" required>
+    <input type="number" name="amount" placeholder="Amount ($)" step="0.01" required>
+    <input type="date" name="date">
+    <input type="text" name="category" placeholder="Category (e.g. Parts, Labor)">
+    <button type="submit">Add Expense</button>
+</form>
+
+<h2>All Expenses</h2>
+{% if expenses %}
+<p><strong>Total: ${{ "%.2f"|format(total) }}</strong></p>
+<table>
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.description }}</td>
+            <td>${{ "%.2f"|format(expense.amount) }}</td>
+            <td>{{ expense.date or "—" }}</td>
+            <td>{{ expense.category or "—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No expenses logged yet.</p>
+{% endif %}
+
+{% endblock %}

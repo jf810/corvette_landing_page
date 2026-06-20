@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance — 1984 Corvette{% endblock %}
+
+{% block page_title %}Maintenance Schedule{% endblock %}
+
+{% block content %}
+
+<form action="/maintenance/add" method="POST" class="entry-form">
+    <h2>Add Maintenance Task</h2>
+    <input type="text" name="task" placeholder="Task (e.g. Oil change)" required>
+    <select name="status">
+        <option value="Pending">Pending</option>
+        <option value="Done">Done</option>
+    </select>
+    <input type="date" name="due_date">
+    <input type="date" name="completed_date">
+    <input type="text" name="time_taken" placeholder="Time taken (e.g. 1 hour)">
+    <textarea name="notes" placeholder="Notes"></textarea>
+    <button type="submit">Add Task</button>
+</form>
+
+<h2>All Maintenance</h2>
+{% if tasks %}
+<table>
+    <thead>
+        <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Due Date</th>
+            <th>Completed</th>
+            <th>Time Taken</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr>
+            <td>{{ task.task }}</td>
+            <td>{{ task.status }}</td>
+            <td>{{ task.due_date or "—" }}</td>
+            <td>{{ task.completed_date or "—" }}</td>
+            <td>{{ task.time_taken or "—" }}</td>
+            <td>{{ task.notes or "—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No maintenance tasks yet.</p>
+{% endif %}
+
+{% endblock %}

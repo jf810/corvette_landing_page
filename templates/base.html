@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}1984 Corvette{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <nav>
+        <div class="nav-header">
+            <span class="nav-title">1984 C4 Corvette</span>
+        </div>
+        <ul>
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/repairs">Repairs & Upgrades</a></li>
+            <li><a href="/specs">Specs</a></li>
+            <li><a href="/maintenance">Maintenance</a></li>
+            <li><a href="/expenses">Expenses</a></li>
+            <li><a href="/wishlist">Wish List</a></li>
+            <li><a href="/resources">Resources</a></li>
+            <li><a href="/notes">Notes</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h1>{% block page_title %}{% endblock %}</h1>
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>

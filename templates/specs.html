@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Specs — 1984 Corvette{% endblock %}
+
+{% block page_title %}Specs{% endblock %}
+
+{% block content %}
+
+<form action="/specs/add" method="POST" class="entry-form">
+    <h2>Add / Update Spec</h2>
+    <input type="text" name="field" placeholder="Field (e.g. Horsepower)" required>
+    <input type="text" name="value" placeholder="Value (e.g. 205 hp)" required>
+    <button type="submit">Save Spec</button>
+</form>
+
+<h2>My 1984 Corvette Specs</h2>
+{% if specs %}
+<table>
+    <thead>
+        <tr>
+            <th>Field</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for spec in specs %}
+        <tr>
+            <td>{{ spec.field }}</td>
+            <td>{{ spec.value }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No specs added yet.</p>
+{% endif %}
+
+{% endblock %}

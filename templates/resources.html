@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Resources — 1984 Corvette{% endblock %}
+
+{% block page_title %}Resources{% endblock %}
+
+{% block content %}
+
+<form action="/resources/add" method="POST" class="entry-form">
+    <h2>Add Resource</h2>
+    <input type="text" name="title" placeholder="Title (e.g. C4 Corvette Forum)" required>
+    <input type="url" name="url" placeholder="URL" required>
+    <textarea name="description" placeholder="Description"></textarea>
+    <button type="submit">Add Resource</button>
+</form>
+
+<h2>All Resources</h2>
+{% if resources %}
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Link</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for resource in resources %}
+        <tr>
+            <td>{{ resource.title }}</td>
+            <td><a href="{{ resource.url }}" target="_blank">Visit</a></td>
+            <td>{{ resource.description or "—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No resources added yet.</p>
+{% endif %}
+
+{% endblock %}
