@@ -1,37 +1,375 @@
 {% extends "base.html" %}
 
 {% block title %}Expenses — 1984 Corvette{% endblock %}
-
 {% block page_title %}Expenses{% endblock %}
 
 {% block content %}
 
+<!-- Toolbar -->
 <div class="page-toolbar">
-    <p style="font-size:13px; color:#666;">Costs pulled automatically from Repairs &amp; Upgrades entries.</p>
-    <div style="font-size:22px; font-weight:700; color:#cc0000;">${{ "%.2f"|format(total) }} total</div>
+    <div style="display:flex; gap:8px;">
+        <button class="btn-add" onclick="openAddExpense()">+ Add Expense</button>
+        <button class="btn-add btn-secondary" onclick="openDrawer('group-drawer', 'group-overlay')">+ New Group</button>
+    </div>
+    <div style="font-size:13px; color:#888; text-align:right;">
+        All amounts in USD
+    </div>
 </div>
 
-{% if repairs %}
-<table>
-    <thead>
-        <tr>
-            <th>Repair / Upgrade</th>
-            <th>Cost</th>
-            <th>Completed</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for r in repairs %}
-        <tr>
-            <td>{{ r.title }}</td>
-            <td>${{ "%.2f"|format(r.cost) }}</td>
-            <td>{{ r.finish_date or "—" }}</td>
-        </tr>
+<!-- Key Metrics -->
+<div class="expense-metrics">
+    <div class="metric-card">
+        <div class="metric-label">Total Spent</div>
+        <div class="metric-value">${{ "%.2f"|format(total) }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Avg / Month</div>
+        <div class="metric-value">${{ "%.2f"|format(avg_per_month) }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Avg / Year</div>
+        <div class="metric-value">${{ "%.2f"|format(avg_per_year) }}</div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="expense-charts">
+    <div class="chart-card">
+        <div class="chart-title">Monthly Spend — Last 12 Months</div>
+        <canvas id="barChart" height="120"></canvas>
+    </div>
+    <div class="chart-card chart-donut-card">
+        <div class="chart-title">By Category</div>
+        {% if donut_labels %}
+        <canvas id="donutChart"></canvas>
+        {% else %}
+        <p style="color:#bbb; font-size:13px; text-align:center; padding:40px 0;">No categorized expenses yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Expense Table -->
+<div style="margin-top:8px;">
+    {% if expenses %}
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Cost</th>
+                <th>Month</th>
+                <th>Vendor</th>
+                <th>Group</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in expenses %}
+            <tr>
+                <td>
+                    {% if e.group_code and e.group_expense_num %}
+                    <span class="expense-code">{{ e.group_code }}-{{ e.group_expense_num }}</span>
+                    {% else %}—{% endif %}
+                </td>
+                <td>{{ e.title }}</td>
+                <td>{{ e.category or "—" }}</td>
+                <td>${{ "%.2f"|format(e.cost or 0) }}</td>
+                <td>{{ e.purchase_month_display or "—" }}</td>
+                <td>{{ e.vendor or "—" }}</td>
+                <td>
+                    {% if e.group_name %}
+                    <span style="font-size:12px; color:#555;">{{ e.group_code }} — {{ e.group_name }}</span>
+                    {% else %}—{% endif %}
+                </td>
+                <td class="actions">
+                    <a href="#" data-expense='{{ e | tojson }}' onclick="openEditExpense(this); return false;">Edit</a>
+                    <form action="/expenses/delete/{{ e.id }}" method="POST" style="display:inline;"
+                          onsubmit="return confirm('Delete this expense?')">
+                        <button type="submit" class="btn-delete">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty-state">No expenses logged yet. Click <strong>+ Add Expense</strong> to get started.</p>
+    {% endif %}
+</div>
+
+<!-- Groups reference panel (collapsible) -->
+{% if groups %}
+<div style="margin-top:32px;">
+    <div class="chart-title" style="margin-bottom:12px;">Groups</div>
+    <div class="groups-grid">
+        {% for g in groups %}
+        <div class="group-chip">
+            <span class="expense-code" style="margin-right:6px;">{{ g.code }}</span>
+            <span style="font-size:13px;">{{ g.name }}</span>
+            <span style="font-size:11px; color:#999; margin-left:6px;">({{ 'Repair' if g.type == 'R' else 'Maintenance' }})</span>
+            <form action="/groups/delete/{{ g.id }}" method="POST" style="display:inline; margin-left:auto;"
+                  onsubmit="return confirm('Delete group {{ g.code }}? Expenses will be unlinked.')">
+                <button type="submit" class="btn-delete" style="font-size:11px;">Remove</button>
+            </form>
+        </div>
         {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p class="empty-state">No repair costs logged yet. Add costs to your <a href="/repairs" style="color:#cc0000;">Repairs &amp; Upgrades</a> entries to see them here.</p>
+    </div>
+</div>
 {% endif %}
+
+<!-- Overlay (shared) -->
+<div class="drawer-overlay" id="expense-overlay" onclick="closeAll()"></div>
+
+<!-- Add / Edit Expense Drawer -->
+<div class="drawer" id="expense-drawer">
+    <div class="drawer-header">
+        <span id="expense-drawer-title">Add Expense</span>
+        <button class="drawer-close" onclick="closeAll()">✕</button>
+    </div>
+    <form id="expense-form" action="/expenses/add" method="POST" class="drawer-form">
+        <label>Title</label>
+        <input type="text" name="title" id="ef-title" placeholder="e.g. Oil Filter, Seat Foam" required>
+
+        <label>Category</label>
+        <select name="category" id="ef-category">
+            <option value="">— Select Category —</option>
+            <optgroup label="Mechanical">
+                <option>Engine</option>
+                <option>Transmission</option>
+                <option>Drivetrain</option>
+                <option>Brakes</option>
+                <option>Suspension</option>
+                <option>Steering</option>
+                <option>Exhaust</option>
+                <option>Fuel System</option>
+                <option>Cooling System</option>
+                <option>Electrical</option>
+            </optgroup>
+            <optgroup label="Body & Interior">
+                <option>Interior</option>
+                <option>Exterior / Body</option>
+                <option>Glass & Trim</option>
+                <option>Lighting</option>
+            </optgroup>
+            <optgroup label="Maintenance Supplies">
+                <option>Fluids & Chemicals</option>
+                <option>Tires & Wheels</option>
+                <option>Filters</option>
+                <option>Belts & Hoses</option>
+            </optgroup>
+            <optgroup label="Ownership & Tools">
+                <option>Registration & Fees</option>
+                <option>Insurance</option>
+                <option>Storage</option>
+                <option>Tools & Equipment</option>
+                <option>Other</option>
+            </optgroup>
+        </select>
+
+        <label>Cost ($)</label>
+        <input type="number" name="cost" id="ef-cost" placeholder="0.00" step="0.01" min="0">
+
+        <label>Purchase Month</label>
+        <input type="month" name="purchase_month" id="ef-month">
+
+        <label>Parts Vendor</label>
+        <input type="text" name="vendor" id="ef-vendor" placeholder="e.g. RockAuto, NAPA, Summit Racing">
+
+        <label>Mechanic / Shop</label>
+        <input type="text" name="mechanic" id="ef-mechanic" placeholder="e.g. Self, Joe's Auto">
+
+        <label>Group</label>
+        <select name="group_id" id="ef-group" onchange="toggleExpenseNewGroup(this)">
+            <option value="">— No Group —</option>
+            <option value="new">+ Create New Group</option>
+            {% if groups %}
+            <optgroup label="Repair Groups">
+                {% for g in groups if g.type == 'R' %}
+                <option value="{{ g.id }}" data-type="R">{{ g.code }} — {{ g.name }}</option>
+                {% endfor %}
+            </optgroup>
+            <optgroup label="Maintenance Groups">
+                {% for g in groups if g.type == 'M' %}
+                <option value="{{ g.id }}" data-type="M">{{ g.code }} — {{ g.name }}</option>
+                {% endfor %}
+            </optgroup>
+            {% endif %}
+        </select>
+        <div id="ef-new-group" style="display:none;">
+            <input type="text" name="group_name" placeholder="New group name">
+            <select name="group_type" id="ef-group-type" style="margin-top:6px;">
+                <option value="R">Repair / Upgrade</option>
+                <option value="M">Maintenance</option>
+            </select>
+        </div>
+
+        <label>Link to Repair (optional)</label>
+        <select name="repair_id" id="ef-repair">
+            <option value="">— None —</option>
+            {% for r in all_repairs %}
+            <option value="{{ r.id }}">{{ r.title }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Link to Maintenance Task (optional)</label>
+        <select name="maintenance_id" id="ef-maintenance">
+            <option value="">— None —</option>
+            {% for t in all_maintenance %}
+            <option value="{{ t.id }}">{{ t.task }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Notes</label>
+        <textarea name="notes" id="ef-notes" rows="3" placeholder="Optional notes"></textarea>
+
+        <button type="submit" class="btn-submit" id="ef-submit">Save Expense</button>
+    </form>
+</div>
+
+<!-- New Group Drawer -->
+<div class="drawer-overlay" id="group-overlay" onclick="closeAll()"></div>
+<div class="drawer" id="group-drawer">
+    <div class="drawer-header">
+        <span>New Group</span>
+        <button class="drawer-close" onclick="closeAll()">✕</button>
+    </div>
+    <form action="/groups/add" method="POST" class="drawer-form">
+        <label>Group Name</label>
+        <input type="text" name="name" required placeholder="e.g. Oil Change, Dashboard Cluster Repair">
+
+        <label>Type</label>
+        <select name="type">
+            <option value="R">Repair / Upgrade</option>
+            <option value="M">Maintenance</option>
+        </select>
+
+        <label>Notes</label>
+        <textarea name="notes" rows="2" placeholder="Optional description"></textarea>
+
+        <button type="submit" class="btn-submit">Create Group</button>
+    </form>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const barLabels  = {{ bar_labels  | tojson }};
+const barValues  = {{ bar_values  | tojson }};
+const donutLabels = {{ donut_labels | tojson }};
+const donutValues = {{ donut_values | tojson }};
+
+// Bar chart
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: barLabels,
+        datasets: [{
+            data: barValues,
+            backgroundColor: '#cc0000',
+            borderRadius: 3,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ' $' + ctx.raw.toFixed(2)
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { callback: val => '$' + val, font: { size: 11 } },
+                grid: { color: '#f0f0f0' }
+            },
+            x: {
+                ticks: { font: { size: 11 } },
+                grid: { display: false }
+            }
+        }
+    }
+});
+
+// Donut chart
+if (donutLabels.length) {
+    new Chart(document.getElementById('donutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: donutLabels,
+            datasets: [{
+                data: donutValues,
+                backgroundColor: [
+                    '#cc0000','#1a1a1a','#555','#888',
+                    '#c47a00','#2d6a4f','#1d4e89','#6d2b7a','#4a7c59'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 11 }, padding: 10, boxWidth: 12 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' ' + ctx.label + ': $' + ctx.raw.toFixed(2)
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Drawer helpers
+function openDrawer(drawerId, overlayId) {
+    document.getElementById(drawerId).classList.add('open');
+    document.getElementById(overlayId).classList.add('open');
+}
+
+function closeAll() {
+    document.querySelectorAll('.drawer, .drawer-overlay').forEach(el => el.classList.remove('open'));
+}
+
+function toggleExpenseNewGroup(select) {
+    document.getElementById('ef-new-group').style.display = select.value === 'new' ? 'block' : 'none';
+}
+
+function openAddExpense() {
+    document.getElementById('expense-drawer-title').textContent = 'Add Expense';
+    document.getElementById('expense-form').action = '/expenses/add';
+    document.getElementById('expense-form').reset();
+    document.getElementById('ef-new-group').style.display = 'none';
+    document.getElementById('ef-submit').textContent = 'Save Expense';
+    openDrawer('expense-drawer', 'expense-overlay');
+}
+
+function openEditExpense(el) {
+    const e = JSON.parse(el.dataset.expense);
+    document.getElementById('expense-drawer-title').textContent = 'Edit Expense';
+    document.getElementById('expense-form').action = '/expenses/update/' + e.id;
+    document.getElementById('ef-title').value    = e.title || '';
+    document.getElementById('ef-category').value = e.category || '';
+    document.getElementById('ef-cost').value     = e.cost || '';
+    document.getElementById('ef-month').value    = e.purchase_month || '';
+    document.getElementById('ef-vendor').value   = e.vendor || '';
+    document.getElementById('ef-mechanic').value = e.mechanic || '';
+    document.getElementById('ef-group').value       = e.group_id || '';
+    document.getElementById('ef-new-group').style.display = 'none';
+    document.getElementById('ef-repair').value      = e.repair_id || '';
+    document.getElementById('ef-maintenance').value = e.maintenance_id || '';
+    document.getElementById('ef-notes').value       = e.notes || '';
+    document.getElementById('ef-submit').textContent = 'Save Changes';
+    openDrawer('expense-drawer', 'expense-overlay');
+}
+</script>
 
 {% endblock %}

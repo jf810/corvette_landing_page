@@ -45,6 +45,7 @@
             <th>Time Taken</th>
             <th>Parts Vendor</th>
             <th>Mechanic</th>
+            <th>Group</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -78,6 +79,11 @@
             <td>
                 {% if task.mechanic %}
                 {{ task.mechanic }}{% if task.paid_for_service %} <small style="color:#cc0000;">(paid)</small>{% endif %}
+                {% else %}—{% endif %}
+            </td>
+            <td>
+                {% if task.group_code %}
+                <span class="expense-code">{{ task.group_code }}</span>
                 {% else %}—{% endif %}
             </td>
             <td class="actions">
@@ -164,6 +170,18 @@
             <input type="number" name="frequency_months_max" id="f-months-max" placeholder="e.g. 6">
         </div>
 
+        <label>Group</label>
+        <select name="group_id" id="f-group" onchange="toggleNewGroup(this, 'f-new-group')">
+            <option value="">— No Group —</option>
+            <option value="new">+ Create New Group</option>
+            {% for g in groups if g.type == 'M' %}
+            <option value="{{ g.id }}">{{ g.code }} — {{ g.name }}</option>
+            {% endfor %}
+        </select>
+        <div id="f-new-group" style="display:none;">
+            <input type="text" name="group_name" placeholder="New group name (e.g. Spring Oil Change)">
+        </div>
+
         <label>Notes</label>
         <textarea name="notes" id="f-notes" rows="4" placeholder="Notes"></textarea>
 
@@ -201,6 +219,7 @@ function openEditDrawer(el) {
     document.getElementById('f-vendor').value = task.vendor || '';
     document.getElementById('f-link').value = task.purchase_link || '';
     document.getElementById('f-notes').value = task.notes || '';
+    document.getElementById('f-group').value = task.group_id || '';
 
     const recurring = !!task.recurring;
     document.getElementById('f-recurring').checked = recurring;
@@ -223,6 +242,11 @@ function clearForm() {
     document.getElementById('f-start-date').disabled = false;
     document.getElementById('f-finish-date').disabled = false;
     document.getElementById('recurring-fields').style.display = 'none';
+    document.getElementById('f-new-group').style.display = 'none';
+}
+
+function toggleNewGroup(select, fieldId) {
+    document.getElementById(fieldId).style.display = select.value === 'new' ? 'block' : 'none';
 }
 
 function toggleDate(fieldId, checkbox) {

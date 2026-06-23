@@ -49,10 +49,7 @@
             <td>{{ item.category or '—' }}</td>
             <td>{% if item.estimated_price %}${{ "%.2f"|format(item.estimated_price) }}{% else %}—{% endif %}</td>
             <td class="actions">
-                <form action="/wishlist/promote/{{ item.id }}" method="POST" style="display:inline"
-                      onsubmit="return confirm('Move &quot;{{ item.name }}&quot; to Repairs &amp; Upgrades?')">
-                    <button type="submit" class="btn-promote">→ Repairs</button>
-                </form>
+                <button class="btn-promote" data-item='{{ item | tojson }}' onclick="openPromoteDrawer(this)">→ Promote</button>
                 <a href="#" data-item='{{ item | tojson }}' onclick="openEditDrawer(this)">Edit</a>
                 <form action="/wishlist/delete/{{ item.id }}" method="POST" style="display:inline"
                       onsubmit="return confirm('Delete this item?')">
@@ -139,6 +136,81 @@ function closeDrawer() {
 
 function clearForm() {
     document.getElementById('drawer-form').reset();
+}
+</script>
+
+<!-- Promote Overlay + Drawer -->
+<div class="drawer-overlay" id="promote-overlay" onclick="closePromoteDrawer()"></div>
+<div class="drawer" id="promote-drawer">
+    <div class="drawer-header">
+        <span id="promote-drawer-title">Promote Item</span>
+        <button class="drawer-close" onclick="closePromoteDrawer()">✕</button>
+    </div>
+    <form id="promote-form" action="" method="POST" class="drawer-form">
+
+        <div style="background:#f4f4f4; border-radius:4px; padding:12px; font-size:14px; font-weight:600; color:#333;" id="promote-item-label"></div>
+
+        <label>Move to</label>
+        <select name="promote_to" id="promote-to" onchange="filterGroupsByType(this.value)">
+            <option value="R">Repair / Upgrade</option>
+            <option value="M">Maintenance</option>
+        </select>
+
+        <label>Group</label>
+        <select name="group_id" id="promote-group" onchange="toggleNewGroupName(this.value)">
+            <option value="">— No Group —</option>
+            <option value="new">+ Create New Group</option>
+            {% for g in groups %}
+            <option value="{{ g.id }}" data-type="{{ g.type }}">{{ g.code }} — {{ g.name }}</option>
+            {% endfor %}
+        </select>
+
+        <div id="new-group-name-field" style="display:none;">
+            <label>New Group Name</label>
+            <input type="text" name="group_name" placeholder="e.g. Dashboard Cluster Repair">
+        </div>
+
+        <p style="font-size:12px; color:#999; margin-top:4px;">
+            If an estimated price exists, an expense entry will also be created automatically.
+        </p>
+
+        <button type="submit" class="btn-submit">Promote →</button>
+    </form>
+</div>
+
+<script>
+function openPromoteDrawer(btn) {
+    const item = JSON.parse(btn.dataset.item);
+    document.getElementById('promote-drawer-title').textContent = 'Promote: ' + item.name;
+    document.getElementById('promote-item-label').textContent = item.name;
+    document.getElementById('promote-form').action = '/wishlist/promote/' + item.id;
+    const defaultType = item.type === 'Maintenance' ? 'M' : 'R';
+    document.getElementById('promote-to').value = defaultType;
+    document.getElementById('promote-group').value = '';
+    document.getElementById('new-group-name-field').style.display = 'none';
+    filterGroupsByType(defaultType);
+    document.getElementById('promote-drawer').classList.add('open');
+    document.getElementById('promote-overlay').classList.add('open');
+}
+
+function closePromoteDrawer() {
+    document.getElementById('promote-drawer').classList.remove('open');
+    document.getElementById('promote-overlay').classList.remove('open');
+}
+
+function filterGroupsByType(type) {
+    const sel = document.getElementById('promote-group');
+    const opts = sel.querySelectorAll('option[data-type]');
+    opts.forEach(opt => {
+        opt.hidden = opt.dataset.type !== type;
+    });
+    if (sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].dataset.type !== type) {
+        sel.value = '';
+    }
+}
+
+function toggleNewGroupName(val) {
+    document.getElementById('new-group-name-field').style.display = val === 'new' ? 'block' : 'none';
 }
 </script>
 

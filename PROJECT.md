@@ -130,19 +130,55 @@ All add/edit interactions use a **slide-in drawer from the right** — not a sep
 
 ---
 
-### Expenses — Partial (analytics only)
-**No data entry on this page.** Costs are pulled automatically from Repairs & Upgrades entries.
+### Expenses ✓ Built
+A standalone expense tracker with analytics. Data is entered directly — not pulled from Repairs & Upgrades automatically (though the Wish List promote flow creates an expense entry automatically, see below).
 
-**Currently shows:**
-- Total spend (all time, from repairs)
-- Line-item list of repair costs with completion date
+**Fields per expense entry:**
+- Title
+- Category (expanded set — see categories below)
+- Cost ($)
+- Purchase Month (YYYY-MM, stored as text; uses `<input type="month">`)
+- Parts Vendor
+- Mechanic / Shop
+- Group (optional — links to a Group record; see Group System below)
+- Link to Repair (optional FK to `repairs.id`)
+- Link to Maintenance Task (optional FK to `maintenance.id`)
+- Notes
 
-**Planned analytics (Phase 1 remaining):**
-- Spend by month (bar or line chart)
-- Trending spend (going up or down?)
-- Spend by category
+**Analytics shown above the table:**
+- **Key metrics row** — Total Spent / Avg Per Month / Avg Per Year
+  - Avg per month = total ÷ number of months from first expense to today
+  - Avg per year = avg per month × 12
+- **Bar chart** — Monthly spend for last 12 months, full width, Y axis auto-scales to data. Rendered with Chart.js (CDN, no install).
+- **Donut chart** — Spend by category, shown to the right of bar chart on desktop, stacked below on mobile.
+- Charts update automatically whenever a new expense is saved.
 
-> Note: There is no separate `expenses` table in the database. All cost data lives on the `repairs` table (`cost` field).
+**Category list (expense-specific, broader than Repairs):**
+- Mechanical: Engine, Transmission, Drivetrain, Brakes, Suspension, Steering, Exhaust, Fuel System, Cooling System, Electrical
+- Body & Interior: Interior, Exterior / Body, Glass & Trim, Lighting
+- Maintenance Supplies: Fluids & Chemicals, Tires & Wheels, Filters, Belts & Hoses
+- Ownership & Tools: Registration & Fees, Insurance, Storage, Tools & Equipment, Other
+
+**Group System:**
+Groups allow multiple expenses (and their linked repairs/maintenance tasks) to be organized under one project.
+- Groups have a **type**: `R` (Repair/Upgrade) or `M` (Maintenance)
+- Codes are auto-generated sequentially per type: first repair group = `R1`, second = `R2`; first maintenance group = `M1`, etc.
+- Each expense within a group gets a stable **sub-number** assigned at creation time: `R1-1`, `R1-2`, `M2-3`, etc. The number never changes even if earlier entries are deleted, preserving a clean audit trail.
+- Groups are displayed with a reference panel at the bottom of the Expenses page; individual groups can be deleted (expenses are unlinked but not deleted).
+
+**Bidirectional group cascade:**
+When you change the group on any linked record, it propagates to all connected records:
+- Change group on an **expense** → linked repair and/or maintenance task automatically update to the same group.
+- Change group on a **repair** → all expenses with `repair_id` pointing to that repair update to the new group and get new sequential sub-numbers within the target group.
+- Change group on a **maintenance task** → same cascade for expenses with `maintenance_id` pointing to that task.
+
+**"+ Create New Group" inline:**
+The Group dropdown in the Add/Edit drawer on Expenses, Repairs & Upgrades, and Maintenance all include a `+ Create New Group` option. Selecting it reveals a name field (and a type selector on the Expenses drawer). The group is created automatically when the form is saved — no need to visit a separate page.
+
+**Behavior:**
+- Slide-in drawer for add/edit (same pattern as Repairs and Maintenance)
+- Expense table shown below charts with columns: Code, Title, Category, Cost, Month, Vendor, Group, Actions
+- Delete with confirmation prompt
 
 ---
 
@@ -160,7 +196,15 @@ A queue of future actions — items that will eventually be moved into Repairs &
 **Behavior:**
 - Slide-in drawer for add/edit
 - Filter by type and category
-- **→ Repairs button** on each row: moves item to Repairs & Upgrades with "Not Started" status, pre-fills title/category/cost/link/notes, and removes it from the wish list
+- **→ Promote button** on each row: opens a slide-in drawer with three options:
+  1. **Move to** — Repair/Upgrade or Maintenance (defaults to match the item's type)
+  2. **Group** — choose an existing group, `+ Create New Group` (reveals a name field), or no group
+  3. Hitting **Promote →** does all of the following atomically:
+     - Creates a new group (if requested) with the correct type code (R or M)
+     - Creates a Repair or Maintenance entry pre-filled with the wishlist item's name, category, cost, link, and notes
+     - If the wishlist item had an estimated price: also creates an Expense entry with `repair_id` or `maintenance_id` set, linked to the same group, and assigned the next sub-number within that group
+     - Removes the item from the wish list
+     - Redirects to the Repairs or Maintenance page
 - Edit and delete with confirmation
 
 ---
@@ -185,12 +229,22 @@ A queue of future actions — items that will eventually be moved into Repairs &
 ```
 repairs:     id, title, status, category, cost, start_date, start_date_unknown,
              finish_date, finish_date_unknown, time_taken, paid_for_service,
-             mechanic, vendor, purchase_link, notes
+             mechanic, vendor, purchase_link, notes, group_id → groups.id
 
 maintenance: id, task, status, start_date, start_date_unknown, finish_date,
              finish_date_unknown, time_taken, paid_for_service, mechanic,
              vendor, purchase_link, recurring, frequency_miles,
-             frequency_months_min, frequency_months_max, next_due_date, notes
+             frequency_months_min, frequency_months_max, next_due_date, notes,
+             group_id → groups.id
+
+expenses:    id, title, category, cost, purchase_month (YYYY-MM text),
+             vendor, mechanic, notes,
+             group_id → groups.id,
+             group_expense_num (stable sub-number within group, e.g. 1, 2, 3),
+             repair_id → repairs.id (optional direct link),
+             maintenance_id → maintenance.id (optional direct link)
+
+groups:      id, name, type ('R' or 'M'), code (auto: R1/R2… or M1/M2…), notes
 
 wishlist:    id, name, type, category, estimated_price, link, notes
 
@@ -199,8 +253,10 @@ resources:   id, title, url, description
 notes:       id, title, folder, content, created_at
 ```
 
-> No `expenses` table. Cost data lives in `repairs.cost`.
+**Schema migration approach:** New columns are added to existing tables via `ALTER TABLE … ADD COLUMN` inside `init_db()`, wrapped in try/except to be safe on re-runs. The `groups` and `expenses` tables use `CREATE TABLE IF NOT EXISTS`. `init_db()` is called at module load time so migrations run automatically on every server start.
+
 > No `python-dateutil` dependency — next due date uses Python stdlib (calendar module).
+> Chart.js loaded via CDN (jsdelivr) on the Expenses page only — no npm or build step needed.
 
 ---
 
@@ -236,11 +292,11 @@ CSS libraries like **98.css**, **7.css**, or **XP.css** provide authentic bevele
 ### Phase 1 — Core structure + data (MVP)
 1. ✓ Scaffold pages, navigation, and database schema
 2. ✓ Basic CRUD on all pages
-3. ✓ Repairs & Upgrades — full rebuild with drawer
+3. ✓ Repairs & Upgrades — full rebuild with drawer; group linkage + cascade
 4. ✓ Specs & Details — window-sticker layout with performance specs, trim/color codes, fluids, vehicle ID (hidden VIN/plate), and notes
-5. ✓ Maintenance — full rebuild with drawer
-6. ✓ Wish List — full rebuild with drawer + promote button
-7. Expenses — add charts and category breakdown
+5. ✓ Maintenance — full rebuild with drawer; group linkage + cascade
+6. ✓ Wish List — full rebuild with drawer + promote flow (repair or maintenance, group, auto-expense)
+7. ✓ Expenses — standalone expense tracker with bar chart, donut chart, key metrics, group system, and bidirectional cascade
 8. Resources — add edit/delete
 9. Notes — add edit/delete
 10. Dashboard — wire up live data from all sections
@@ -270,4 +326,5 @@ CSS libraries like **98.css**, **7.css**, or **XP.css** provide authentic bevele
 
 - How important is mobile vs. desktop for day-to-day use in the garage?
 - Which other cars do I most want to compare specs against?
-- Should the Wish List "→ Repairs" button also support promoting to Maintenance?
+- ~~Should the Wish List "→ Repairs" button also support promoting to Maintenance?~~ **Done** — promote flow now supports both Repair and Maintenance, with group selection and auto-expense creation.
+- Phase 2 (Repairs & Maintenance group linkage on those pages) is fully complete — groups appear as a column in both tables and are selectable in the add/edit drawers.

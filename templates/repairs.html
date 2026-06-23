@@ -42,6 +42,7 @@
             <th>Time Taken</th>
             <th>Parts Vendor</th>
             <th>Mechanic</th>
+            <th>Group</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -64,6 +65,11 @@
             <td>
                 {% if repair.mechanic %}
                 {{ repair.mechanic }}{% if repair.paid_for_service %} <small style="color:#cc0000;">(paid)</small>{% endif %}
+                {% else %}—{% endif %}
+            </td>
+            <td>
+                {% if repair.group_code %}
+                <span class="expense-code">{{ repair.group_code }}</span>
                 {% else %}—{% endif %}
             </td>
             <td class="actions">
@@ -148,6 +154,18 @@
         <label>Purchase Link</label>
         <input type="url" name="purchase_link" id="f-link" placeholder="https://...">
 
+        <label>Group</label>
+        <select name="group_id" id="f-group" onchange="toggleNewGroup(this, 'f-new-group')">
+            <option value="">— No Group —</option>
+            <option value="new">+ Create New Group</option>
+            {% for g in groups if g.type == 'R' %}
+            <option value="{{ g.id }}">{{ g.code }} — {{ g.name }}</option>
+            {% endfor %}
+        </select>
+        <div id="f-new-group" style="display:none;">
+            <input type="text" name="group_name" placeholder="New group name (e.g. Dashboard Cluster Repair)">
+        </div>
+
         <label>Notes</label>
         <textarea name="notes" id="f-notes" rows="4" placeholder="Notes"></textarea>
 
@@ -187,6 +205,7 @@ function openEditDrawer(el) {
     document.getElementById('f-vendor').value = repair.vendor || '';
     document.getElementById('f-link').value = repair.purchase_link || '';
     document.getElementById('f-notes').value = repair.notes || '';
+    document.getElementById('f-group').value = repair.group_id || '';
     document.getElementById('drawer').classList.add('open');
     document.getElementById('drawer-overlay').classList.add('open');
 }
@@ -200,12 +219,17 @@ function clearForm() {
     document.getElementById('drawer-form').reset();
     document.getElementById('f-start-date').disabled = false;
     document.getElementById('f-finish-date').disabled = false;
+    document.getElementById('f-new-group').style.display = 'none';
 }
 
 function toggleDate(fieldId, checkbox) {
     const input = document.getElementById(fieldId);
     input.disabled = checkbox.checked;
     if (checkbox.checked) input.value = '';
+}
+
+function toggleNewGroup(select, fieldId) {
+    document.getElementById(fieldId).style.display = select.value === 'new' ? 'block' : 'none';
 }
 </script>
 
